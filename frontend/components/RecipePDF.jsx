@@ -94,7 +94,7 @@ export function RecipePDF({ recipe }) {
         {/* Footer (appears on every page) */}
         <Text style={styles.footer} fixed>
           Recipe by{" "}
-          <Link src="https://yourwebsite.com" style={styles.link}>
+          <Link src="https://chefgpt-ai-recipe-finder.vercel.app" style={styles.link}>
             ChefGPT
           </Link>
         </Text>
