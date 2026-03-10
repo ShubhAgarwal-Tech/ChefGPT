@@ -29,11 +29,11 @@ const subscriptionTier = userId && has({ plan: "pro" }) ? "pro" : "free";
             className="
       object-contain
       
-      w-28
+      w-24
       sm:w-30
-      md:w-42
+      md:w-40
       lg:w-48
-      xl:w-50
+      xl:w-52
       
       h-auto
     "
@@ -42,7 +42,7 @@ const subscriptionTier = userId && has({ plan: "pro" }) ? "pro" : "free";
 
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-1.8 sm:gap-3 md:gap-4 lg:gap-8">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-8">
           <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-stone-600">
             <Link
               href="/dashboard"
@@ -73,7 +73,7 @@ const subscriptionTier = userId && has({ plan: "pro" }) ? "pro" : "free";
             <PricingModal subscriptionTier={subscriptionTier}>
                 <Badge
                   variant="outline"
-                  className={`flex h-6 sm:h-7 md:h-8 px-2 sm:px-3 gap-1 sm:gap-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all ${
+                  className={`flex h-6 sm:h-7 md:h-8 px-1.5 sm:px-3 gap-1 sm:gap-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all ${
                     subscriptionTier === "pro"
                       ? "bg-linear-to-r from-orange-600 to-amber-500 text-white border-none shadow-sm"
                       : "bg-stone-200/50 text-stone-600 border-stone-200 cursor-pointer hover:bg-stone-300/50 hover:border-stone-300"
@@ -99,7 +99,7 @@ const subscriptionTier = userId && has({ plan: "pro" }) ? "pro" : "free";
             <SignInButton mode="modal">
               <Button
                 variant="ghost"
-                className="text-[11px] sm:text-sm text-stone-600 hover:text-orange-600 hover:bg-orange-50 px-2 sm:px-3 md:px-2 py-1 sm:py-2 font-medium"
+                className="text-[12px] sm:text-sm text-stone-600 hover:text-orange-600 hover:bg-orange-50 px-2 sm:px-3 md:px-2 py-1 sm:py-2 font-medium"
               >
                 Sign In
               </Button>

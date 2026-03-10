@@ -66,18 +66,18 @@ export default async function Home() {
               />
 
               {/* Floating Card */}
-              <Card className="absolute bottom-8 left-8 right-8 bg-white/95 backdrop-blur-sm border-2 border-stone-900 py-0">
-                <CardContent className="p-4">
+              <Card className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6 md:bottom-8 md:left-8 md:right-8 bg-white/95 backdrop-blur-sm border-2 border-stone-900 py-0">
+                <CardContent className="p-2 sm:p-3 md:p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="font-bold text-lg">
+                      <h3 className="font-bold text-sm sm:text-base md:text-lg">
                         Rustic Tomato Basil Pasta
                       </h3>
                       <div className="flex gap-0.5 mt-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className="w-3 h-3 fill-orange-500 text-orange-500"
+                            className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-orange-500 text-orange-500"
                           />
                         ))}
                       </div>
