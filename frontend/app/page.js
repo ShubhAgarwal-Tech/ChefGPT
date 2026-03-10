@@ -180,7 +180,7 @@ export default async function Home() {
                 <div className="flex gap-6 items-start">
                   <Badge
                     variant="outline"
-                    className="text-6xl font-bold text-orange-500 border-none bg-transparent p-0 h-auto"
+                    className="text-6xl font-bold text-orange-500 border-none bg-transparent p-0 h-auto w-16 flex items-center justify-center"
                   >
                     {item.step}
                   </Badge>
