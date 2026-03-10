@@ -42,7 +42,7 @@ const subscriptionTier = userId && has({ plan: "pro" }) ? "pro" : "free";
 
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-1 sm:gap-3 md:gap-4 lg:gap-8">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-8">
           <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-stone-600">
             <Link
               href="/dashboard"
