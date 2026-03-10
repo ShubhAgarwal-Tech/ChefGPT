@@ -12,8 +12,8 @@ import UserDropdown from "./UserDropdown";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function Header() {
-  const { has } = await auth();
-const subscriptionTier = has({ plan: "pro" }) ? "pro" : "free";
+  const { userId, has } = await auth();
+const subscriptionTier = userId && has({ plan: "pro" }) ? "pro" : "free";
 
   return (
     <header className="fixed top-0 w-full border-b border-stone-200 bg-stone-100 backdrop-blur-md z-50 supports-backdrop-filter:bg-stone-100">
@@ -29,8 +29,8 @@ const subscriptionTier = has({ plan: "pro" }) ? "pro" : "free";
             className="
       object-contain
       
-      w-34
-      sm:w-36
+      w-28
+      sm:w-30
       md:w-42
       lg:w-48
       xl:w-50
@@ -42,8 +42,8 @@ const subscriptionTier = has({ plan: "pro" }) ? "pro" : "free";
 
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-8">
-          <div className="hidden lg:flex items-center space-x-8 text-sm font-medium text-stone-600">
+        <div className="flex items-center gap-1.8 sm:gap-3 md:gap-4 lg:gap-8">
+          <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-stone-600">
             <Link
               href="/dashboard"
               className="hover:text-orange-600 transition-colors flex gap-1 items-center"
@@ -99,13 +99,13 @@ const subscriptionTier = has({ plan: "pro" }) ? "pro" : "free";
             <SignInButton mode="modal">
               <Button
                 variant="ghost"
-                className="text-xs sm:text-sm text-stone-600 hover:text-orange-600 hover:bg-orange-50 px-2 sm:px-3 md:px-2 py-1 sm:py-2 font-medium"
+                className="text-[11px] sm:text-sm text-stone-600 hover:text-orange-600 hover:bg-orange-50 px-2 sm:px-3 md:px-2 py-1 sm:py-2 font-medium"
               >
                 Sign In
               </Button>
             </SignInButton>
             <SignUpButton mode="modal">
-              <Button variant="primary" className="rounded-full text-xs sm:text-sm px-3 sm:px-4 md:px-6 py-1 sm:py-2">
+              <Button variant="primary" className="rounded-full text-[11px] sm:text-sm px-3 sm:px-4 md:px-6 py-1 sm:py-2">
                 Get Started
               </Button>
             </SignUpButton>
