@@ -13,6 +13,24 @@ const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
+async function generateWithRetry(model, prompt, retries = 3, delay = 2000) {
+  try {
+    const result = await model.generateContent(prompt);
+    return result;
+  } catch (error) {
+    if ((error.status === 503 || error.status === 429) && retries > 0) {
+      console.warn(`⚠️ Gemini busy. Retrying... (${retries} left)`);
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      return generateWithRetry(model, prompt, retries - 1, delay);
+    }
+
+    console.error("❌ Gemini API failed:", error);
+    throw new Error("AI service is busy. Please try again in a few seconds.");
+  }
+}
+
 // Helper function to normalize recipe title
 function normalizeTitle(title) {
   return title
@@ -204,7 +222,7 @@ Guidelines:
 - Keep total instructions under 12 steps
 `;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateWithRetry(model, prompt);
     const response = await result.response;
     const text = response.text();
 
@@ -539,7 +557,7 @@ Rules:
 - Make recipes realistic and delicious
 `;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateWithRetry(model, prompt);
     const response = await result.response;
     const text = response.text();
 
@@ -566,7 +584,10 @@ Rules:
     };
   } catch (error) {
     console.error("❌ Error in getRecipesByPantryIngredients:", error);
-    throw new Error(error.message || "Failed to get recipe suggestions");
+    return {
+    success: false,
+    message: "AI service is busy right now. Please try again in a moment.",
+  };
   }
 }
 
