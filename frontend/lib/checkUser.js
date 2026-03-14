@@ -6,6 +6,7 @@ const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
 
 export const checkUser = async () => {
   const { userId, has } = await auth();
+  console.log("Clerk userId:", userId);
 
   if (!userId) {
   console.log("No User found");
@@ -19,6 +20,11 @@ export const checkUser = async () => {
 
   // Check if user has Pro plan
   const user = await currentUser();
+  console.log("Clerk currentUser:", user?.id);
+  if (!user) {
+    console.error("Clerk user not found");
+    return null;
+  }
 const subscriptionTier = has({ plan: "pro" }) ? "pro" : "free";
 
   try {

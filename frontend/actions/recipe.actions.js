@@ -15,8 +15,7 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 async function generateWithRetry(model, prompt, retries = 3, delay = 2000) {
   try {
-    const result = await model.generateContent(prompt);
-    return result;
+    return await model.generateContent(prompt);
   } catch (error) {
     if ((error.status === 503 || error.status === 429) && retries > 0) {
       console.warn(`⚠️ Gemini busy. Retrying... (${retries} left)`);
@@ -27,7 +26,7 @@ async function generateWithRetry(model, prompt, retries = 3, delay = 2000) {
     }
 
     console.error("❌ Gemini API failed:", error);
-    throw new Error("AI service is busy. Please try again in a few seconds.");
+    throw new Error("AI service is busy right now. Please try again shortly.");
   }
 }
 
@@ -86,12 +85,18 @@ export async function getOrGenerateRecipe(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again to generate recipes.",
+      };
     }
 
     const recipeName = formData.get("recipeName");
     if (!recipeName) {
-      throw new Error("Recipe name is required");
+      return {
+        success: false,
+        message: "Please enter a recipe name.",
+      };
     }
 
     // Normalize the title (e.g., "apple cake" → "Apple Cake")
@@ -275,15 +280,23 @@ Guidelines:
       "moroccan",
       "brazilian",
       "caribbean",
-      "middle-eastern",
+      "middle - eastern",
       "british",
       "german",
       "portuguese",
       "other",
     ];
-    const cuisine = validCuisines.includes(recipeData.cuisine?.toLowerCase())
+    let cuisine = recipeData.cuisine
       ? recipeData.cuisine.toLowerCase()
       : "other";
+
+    if (cuisine === "middle-eastern") {
+      cuisine = "middle - eastern";
+    }
+
+    if (!validCuisines.includes(cuisine)) {
+      cuisine = "other";
+    }
 
     // Step 3: Fetch image from Unsplash
     console.log("🖼️ Fetching image from Unsplash...");
@@ -351,7 +364,11 @@ Guidelines:
     };
   } catch (error) {
     console.error("❌ Error in getOrGenerateRecipe:", error);
-    throw new Error(error.message || "Failed to load recipe");
+    return {
+      success: false,
+      message:
+        "Our AI chef is currently busy. Please try generating the recipe again in a few seconds.",
+    };
   }
 }
 
@@ -360,7 +377,10 @@ export async function saveRecipeToCollection(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again to save recipes.",
+      };
     }
 
     const recipeId = formData.get("recipeId");
@@ -409,7 +429,10 @@ export async function saveRecipeToCollection(formData) {
     if (!saveResponse.ok) {
       const errorText = await saveResponse.text();
       console.error("❌ Failed to save recipe:", errorText);
-      throw new Error("Failed to save recipe to collection");
+      return {
+        success: false,
+        message: "Failed to save recipe. Please try again.",
+      };
     }
 
     const savedRecipe = await saveResponse.json();
@@ -423,7 +446,10 @@ export async function saveRecipeToCollection(formData) {
     };
   } catch (error) {
     console.error("❌ Error saving recipe to collection:", error);
-    throw new Error(error.message || "Failed to save recipe");
+    return {
+      success: false,
+      message: "Failed to save recipe. Please try again later.",
+    };
   }
 }
 
@@ -432,13 +458,19 @@ export async function removeRecipeFromCollection(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again.",
+      };
     }
 
     const savedRecipeId = formData.get("savedRecipeId");
 
     if (!savedRecipeId) {
-      throw new Error("Saved recipe ID is required");
+      return {
+        success: false,
+        message: "Recipe could not be removed. Please refresh and try again.",
+      };
     }
 
     console.log("Deleting saved recipe:", savedRecipeId);
@@ -450,11 +482,14 @@ export async function removeRecipeFromCollection(formData) {
         headers: {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
         },
-      }
+      },
     );
 
     if (!deleteResponse.ok) {
-      throw new Error("Failed to remove recipe from collection");
+      return {
+        success: false,
+        message: "Failed to remove recipe. Please try again.",
+      };
     }
 
     return {
@@ -463,7 +498,11 @@ export async function removeRecipeFromCollection(formData) {
     };
   } catch (error) {
     console.error("❌ Error removing recipe:", error);
-    throw new Error(error.message);
+
+    return {
+      success: false,
+      message: "Unable to remove recipe right now. Please try again later.",
+    };
   }
 }
 
@@ -472,7 +511,10 @@ export async function getRecipesByPantryIngredients() {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again to view pantry recipes.",
+      };
     }
 
     // ✅ ARCJET RATE LIMIT CHECK
@@ -489,13 +531,12 @@ export async function getRecipesByPantryIngredients() {
 
     if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
-        throw new Error(
-          `Monthly AI recipe limit reached. ${
-            isPro
-              ? "Please contact support."
-              : "Upgrade to Pro for unlimited scans!"
-          }`,
-        );
+        return {
+          success: false,
+          message: isPro
+            ? "AI usage limit reached. Please contact support."
+            : "Free plan limit reached. Upgrade to Pro for unlimited scans.",
+        };
       }
       throw new Error("Request denied");
     }
@@ -512,7 +553,10 @@ export async function getRecipesByPantryIngredients() {
     );
 
     if (!pantryResponse.ok) {
-      throw new Error("Failed to fetch pantry items");
+      return {
+        success: false,
+        message: "Could not load pantry items. Please refresh the page.",
+      };
     }
 
     const pantryData = await pantryResponse.json();
@@ -585,9 +629,9 @@ Rules:
   } catch (error) {
     console.error("❌ Error in getRecipesByPantryIngredients:", error);
     return {
-    success: false,
-    message: "AI service is busy right now. Please try again in a moment.",
-  };
+      success: false,
+      message: "AI service is busy right now. Please try again in a moment.",
+    };
   }
 }
 
@@ -596,7 +640,10 @@ export async function getSavedRecipes() {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again to view your saved recipes.",
+      };
     }
 
     const response = await fetch(
@@ -606,29 +653,33 @@ export async function getSavedRecipes() {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
         },
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch saved recipes");
+      return {
+        success: false,
+        message:
+          "Unable to load your saved recipes right now. Please refresh the page and try again.",
+      };
     }
 
     const data = await response.json();
 
     const recipes = data.data
-  .map((savedRecipe) => {
-    const recipe = savedRecipe.recipe;
+      .map((savedRecipe) => {
+        const recipe = savedRecipe.recipe;
 
-    if (!recipe) return null;
+        if (!recipe) return null;
 
-    return {
-      id: recipe.id,
-      savedRecipeId: savedRecipe.documentId, // ⭐ important
-      ...recipe,
-    };
-  })
-  .filter(Boolean);
-      console.log(JSON.stringify(data, null, 2));
+        return {
+          id: recipe.id,
+          savedRecipeId: savedRecipe.documentId, // ⭐ important
+          ...recipe,
+        };
+      })
+      .filter(Boolean);
+    console.log(JSON.stringify(data, null, 2));
 
     return {
       success: true,
@@ -637,6 +688,10 @@ export async function getSavedRecipes() {
     };
   } catch (error) {
     console.error("Error fetching saved recipes:", error);
-    throw new Error(error.message || "Failed to load saved recipes");
+    return {
+      success: false,
+      message:
+        "Something went wrong while loading your recipes. Please try again later.",
+    };
   }
 }

@@ -85,7 +85,7 @@ function RecipeContent() {
       if (recipeData.fromDatabase) {
         toast.success("Recipe loaded from database");
       } else {
-        toast.success("New recipe generated and saved!");
+        toast.success("New recipe generated successfully!");
       }
     }
   }, [recipeData]);
@@ -112,20 +112,26 @@ function RecipeContent() {
     }
   }, [removeData]);
 
+  useEffect(() => {
+    if (recipeData && !recipeData.success) {
+      toast.error(recipeData.message || "Failed to load recipe.");
+    }
+  }, [recipeData]);
+
   // Toggle save/unsave
   const handleToggleSave = async () => {
-  if (!recipeId) return;
+    if (!recipeId) return;
 
-  const formData = new FormData();
+    const formData = new FormData();
 
-  if (isSaved) {
-    formData.append("savedRecipeId", savedRecipeId);
-    await removeFromCollection(formData);
-  } else {
-    formData.append("recipeId", recipeId);
-    await saveToCollection(formData);
-  }
-};
+    if (isSaved) {
+      formData.append("savedRecipeId", savedRecipeId);
+      await removeFromCollection(formData);
+    } else {
+      formData.append("recipeId", recipeId);
+      await saveToCollection(formData);
+    }
+  };
 
   // No recipe name in URL
   if (!recipeName) {
@@ -193,7 +199,8 @@ function RecipeContent() {
             Failed to load recipe
           </h2>
           <p className="text-stone-600 mb-6 font-light">
-            Something went wrong while loading the recipe. Please try again.
+            {recipeData?.message ||
+              "Something went wrong while loading the recipe. Please try again."}
           </p>
           <div className="flex gap-3 justify-center">
             <Button
@@ -298,7 +305,7 @@ function RecipeContent() {
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <Button
                 onClick={handleToggleSave}
-                disabled={saving || removing||isSaved}
+                disabled={saving || removing || isSaved}
                 className={`${
                   isSaved
                     ? "bg-green-600 hover:bg-green-700 border-2 border-green-700"

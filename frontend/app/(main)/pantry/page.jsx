@@ -89,7 +89,7 @@ export default function PantryPage() {
   } catch (error) {
     // Rollback UI if backend fails
     setItems(previousItems);
-    toast.error("Failed to delete item");
+    toast.error(error.message ||"Failed to delete item");
   }
 };
 
@@ -131,7 +131,7 @@ export default function PantryPage() {
     toast.success("Item updated");
   } catch (error) {
     setItems(previousItems); // rollback
-    toast.error("Failed to update item");
+    toast.error(error.message ||"Failed to update item");
   }
 
   setEditingId(null);

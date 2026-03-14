@@ -17,7 +17,10 @@ export async function scanPantryImage(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again.",
+      };
     }
 
     // Check if user is Pro
@@ -36,20 +39,26 @@ export async function scanPantryImage(formData) {
 
     if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
-        throw new Error(
-          `Monthly scan limit reached. ${
-            isPro
-              ? "Please contact support if you need more scans."
-              : "Upgrade to Pro for unlimited scans!"
-          }`
-        );
+        return {
+          success: false,
+          message: isPro
+            ? "Monthly scan limit reached. Please contact support."
+            : "Free plan scan limit reached. Upgrade to Pro.",
+        };
       }
-      throw new Error("Request denied by security system");
+
+      return {
+        success: false,
+        message: "Request denied by security system.",
+      };
     }
 
     const imageFile = formData.get("image");
     if (!imageFile) {
-      throw new Error("No image provided");
+      return {
+    success: false,
+    message: "Please upload an image.",
+  };
     }
 
     // Convert image to base64
@@ -104,13 +113,18 @@ Rules:
       ingredients = JSON.parse(cleanText);
     } catch (parseError) {
       console.error("Failed to parse Gemini response:", text);
-      throw new Error("Failed to parse ingredients. Please try again.");
+      return {
+  success: false,
+  message: "AI could not read the image clearly. Try another photo.",
+};
     }
 
     if (!Array.isArray(ingredients) || ingredients.length === 0) {
-      throw new Error(
-        "No ingredients detected in the image. Please try a clearer photo."
-      );
+      return {
+        success: false,
+        message:
+          "No ingredients detected in image. Please give the clear picture.",
+      };
     }
 
     return {
@@ -121,7 +135,10 @@ Rules:
     };
   } catch (error) {
     console.error("Error scanning pantry:", error);
-    throw new Error(error.message || "Failed to scan image");
+    return {
+      success: false,
+      message: "Failed to scan image. Please try again.",
+    };
   }
 }
 
@@ -130,14 +147,20 @@ export async function saveToPantry(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again.",
+      };
     }
 
     const ingredientsJson = formData.get("ingredients");
     const ingredients = JSON.parse(ingredientsJson);
 
     if (!ingredients || ingredients.length === 0) {
-      throw new Error("No ingredients to save");
+      return {
+    success: false,
+    message: "No ingredients detected to save.",
+  };
     }
 
     // Create pantry items in Strapi
@@ -172,7 +195,10 @@ export async function saveToPantry(formData) {
     };
   } catch (error) {
     console.error("Error saving to pantry:", error);
-    throw new Error(error.message || "Failed to save items");
+    return {
+      success: false,
+      message: "Failed to save items.",
+    };
   }
 }
 
@@ -181,7 +207,10 @@ export async function addPantryItemManually(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again.",
+      };
     }
 
     const name = formData.get("name");
@@ -210,7 +239,10 @@ export async function addPantryItemManually(formData) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Failed to add item:", errorText);
-      throw new Error("Failed to add item to pantry");
+      return {
+        success: false,
+        message: "Failed to add items to pantry. Please try again.",
+      };
     }
 
     const data = await response.json();
@@ -222,7 +254,10 @@ export async function addPantryItemManually(formData) {
     };
   } catch (error) {
     console.error("Error adding item manually:", error);
-    throw new Error(error.message || "Failed to add item");
+    return {
+      success: false,
+      message: "Failed to add item. Please try again.",
+    };
   }
 }
 
@@ -231,7 +266,10 @@ export async function getPantryItems() {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again.",
+      };
     }
 
     const response = await fetch(
@@ -241,11 +279,14 @@ export async function getPantryItems() {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
         },
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch pantry items");
+      return {
+        success: false,
+        message: "Failed to fetch pantry items.",
+      };
     }
 
     const data = await response.json();
@@ -259,7 +300,10 @@ export async function getPantryItems() {
     };
   } catch (error) {
     console.error("Error fetching pantry:", error);
-    throw new Error(error.message || "Failed to load pantry");
+    return {
+      success: false,
+      message: "Failed to load pantry.",
+    };
   }
 }
 
@@ -268,7 +312,10 @@ export async function deletePantryItem(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again.",
+      };
     }
 
     const itemId = formData.get("itemId");
@@ -281,7 +328,10 @@ export async function deletePantryItem(formData) {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to delete item");
+      return {
+    success: false,
+    message: "Failed to delete item. Please try again.",
+  };
     }
 
     return {
@@ -290,7 +340,10 @@ export async function deletePantryItem(formData) {
     };
   } catch (error) {
     console.error("Error deleting item:", error);
-    throw new Error(error.message || "Failed to delete item");
+    return {
+    success: false,
+    message: "Failed to delete item. Please try again.",
+  };
   }
 }
 
@@ -299,7 +352,10 @@ export async function updatePantryItem(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "Please sign in again.",
+      };
     }
 
     const itemId = formData.get("itemId");
@@ -321,7 +377,10 @@ export async function updatePantryItem(formData) {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to update item");
+      return {
+    success: false,
+    message: "Failed to update item. Please try again.",
+  };
     }
 
     const data = await response.json();
@@ -333,6 +392,9 @@ export async function updatePantryItem(formData) {
     };
   } catch (error) {
     console.error("Error updating item:", error);
-    throw new Error(error.message || "Failed to update item");
+    return {
+    success: false,
+    message: "Failed to update item. Please try again.",
+  };
   }
 }
