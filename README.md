@@ -112,5 +112,3 @@ ChefGPT simplifies cooking decisions in a few intelligent steps:
 ## Deployment
 - Frontend - **Vercel**
 - Backend - **Strapi Cloud**
-
----
