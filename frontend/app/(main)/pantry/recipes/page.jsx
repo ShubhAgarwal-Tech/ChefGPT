@@ -162,7 +162,7 @@ export default function PantryRecipesPage() {
         )}
 
         {/* Empty Pantry State */}
-        {!loading && recipes.length === 0 && recipesData?.success === false && (
+        {!loading && recipes.length === 0 && recipesData?.success === true && (
           <div className="bg-white p-12 text-center border-2 border-dashed border-stone-200">
             <div className="bg-orange-50 w-20 h-20 border-2 border-orange-200 flex items-center justify-center mx-auto mb-6">
               <AlertCircle className="w-10 h-10 text-orange-600" />
@@ -194,7 +194,7 @@ export default function PantryRecipesPage() {
         )}
 
         {/* Rate Limit Reached */}
-        {!loading && recipesData === undefined && (
+        {!loading && recipesData?.success === false && (
           <div className="bg-linear-to-br from-orange-50 to-amber-50 p-12 text-center border-2 border-orange-200">
             <div className="bg-orange-100 w-20 h-20 border-2 border-orange-200 flex items-center justify-center mx-auto mb-6">
               <Sparkles className="w-10 h-10 text-orange-600" />
