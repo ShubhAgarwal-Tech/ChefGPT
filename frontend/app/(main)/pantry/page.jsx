@@ -144,8 +144,9 @@ export default function PantryPage() {
   };
 
   // Handle modal success (refresh items)
-  const handleModalSuccess = (newItems = []) => {
-  setItems((prev) => [...newItems, ...prev]);
+  const handleModalSuccess = async () => {
+  setItems([]);
+  await fetchItems();
 };
 
   return (
