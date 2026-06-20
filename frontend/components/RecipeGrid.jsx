@@ -6,24 +6,31 @@ import Link from "next/link";
 import useFetch from "@/hooks/use-fetch";
 import RecipeCard from "@/components/RecipeCard";
 
+const formatFilterValue = (value) =>
+  decodeURIComponent(value)
+    .replace(/-/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
 export default function RecipeGrid({
   type, // "category" or "cuisine"
   value, // actual category/cuisine name
+  filterValue = value,
   fetchAction, // server action to fetch meals
   backLink = "/dashboard",
 }) {
   const { loading, data, fn: fetchMeals } = useFetch(fetchAction);
 
   useEffect(() => {
-    if (value) {
-      // Capitalize first letter for API call
-      const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
-      fetchMeals(formattedValue);
+    if (filterValue) {
+      fetchMeals(formatFilterValue(filterValue));
     }
-  }, [value]);
+  }, [filterValue]);
 
   const meals = data?.meals || [];
-  const displayName = value?.replace(/-/g, " "); // Convert "saudi-arabian" to "saudi arabian"
+  const displayName = value ? formatFilterValue(value) : "";
 
   return (
     <div className="min-h-screen bg-stone-50 pt-14 pb-16 px-4">

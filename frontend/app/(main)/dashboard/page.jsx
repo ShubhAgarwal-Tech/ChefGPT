@@ -9,7 +9,7 @@ import {
   getCategories,
   getAreas,
 } from "@/actions/mealdb.actions";
-import { getCategoryEmoji, getCountryFlag } from "@/lib/data";
+import { getCategoryEmoji, getCountryFlagEmojiUrl } from "@/lib/data";
 
 export default async function DashboardPage() {
   // Fetch data server-side
@@ -20,6 +20,16 @@ export default async function DashboardPage() {
   const recipeOfTheDay = recipeData?.recipe;
   const categories = categoriesData?.categories || [];
   const areas = areasData?.areas || [];
+  const uniqueAreas = Array.from(
+    new Map(
+      areas
+        .filter((area) => area?.strArea)
+        .map((area) => {
+          const strArea = area.strArea.trim();
+          return [strArea.toLowerCase(), { ...area, strArea }];
+        })
+    ).values()
+  );
 
   return (
     <div className="min-h-screen bg-stone-50 py-16 px-4">
@@ -167,25 +177,40 @@ export default async function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {areas.map((area) => (
-              <Link
-                key={area.strArea}
-                href={`/recipes/cuisine/${area.strArea
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}`}
-              >
-                <div className="bg-stone-50 p-5 border-2 border-stone-200 hover:border-orange-600 hover:shadow-lg transition-all group cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">
-                      {getCountryFlag(area.strArea)}
-                    </span>
-                    <span className="font-bold text-stone-900 group-hover:text-orange-600 transition-colors text-sm">
-                      {area.strArea}
-                    </span>
+            {uniqueAreas.map((area) => {
+              const flagUrl = getCountryFlagEmojiUrl(
+                area.strArea,
+                area.strCountry
+              );
+
+              return (
+                <Link
+                  key={area.strArea}
+                  href={`/recipes/cuisine/${encodeURIComponent(
+                    area.strArea.toLowerCase().replace(/\s+/g, "-")
+                  )}?filter=${encodeURIComponent(area.filterArea)}`}
+                >
+                  <div className="bg-stone-50 p-5 border-2 border-stone-200 hover:border-orange-600 hover:shadow-lg transition-all group cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      {flagUrl ? (
+                        <Image
+                          src={flagUrl}
+                          alt={`${area.strArea} flag`}
+                          width={32}
+                          height={32}
+                          className="object-contain"
+                        />
+                      ) : (
+                        <span className="text-3xl">🌐</span>
+                      )}
+                      <span className="font-bold text-stone-900 group-hover:text-orange-600 transition-colors text-sm">
+                        {area.strArea}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </section>
       </div>
