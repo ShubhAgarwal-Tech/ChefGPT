@@ -31,11 +31,17 @@ const aj = arcjet({
 
 export default clerkMiddleware(async (auth, req) => {
   // Apply Arcjet protection FIRST (before Clerk auth check)
+
+  if (
+    req.nextUrl.pathname.startsWith("/api") ||
+    isProtectedRoute(req)
+  ) {
   const decision = await aj.protect(req);
 
   if (decision.isDenied()) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+}
 
   // Then apply Clerk authentication
   const { userId, redirectToSignIn } = await auth();
